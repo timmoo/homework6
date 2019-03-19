@@ -32,3 +32,21 @@ where S.InvoiceDate >= '2015-01-01'
 and S.InvoiceDate <= eomonth(S.InvoiceDate)
 order by S.InvoiceDate, [Sale Amount], I.InvoiceID, C.CustomerName;
 
+--SQL Server parse and compile time: 
+--   CPU time = 78 ms, elapsed time = 80 ms.
+
+-- SQL Server Execution Times:
+--   CPU time = 0 ms,  elapsed time = 0 ms.
+
+--(101356 row(s) affected)
+
+ --SQL Server Execution Times:
+   --CPU time = 35766 ms,  elapsed time = 37100 ms.
+
+ --SQL Server Execution Times:
+   --CPU time = 0 ms,  elapsed time = 0 ms.
+
+--(101356 row(s) affected)
+
+ --SQL Server Execution Times:
+   --CPU time = 281 ms,  elapsed time = 1681 ms.
