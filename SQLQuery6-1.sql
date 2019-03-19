@@ -1,51 +1,34 @@
-WITH TotalSummCTE AS 
-	(SELECT MONTH(INV.InvoiceDate) AS Mesyac1, 
-	YEAR(INV.InvoiceDate) as God1, 
-	SUM(INVL.Quantity*INVL.UnitPrice) AS TotalSumm
-	FROM Sales.InvoiceLines AS INVL
-	JOIN Sales.Invoices AS INV 
-	ON INV.InvoiceID=INVL.InvoiceID AND INV.InvoiceID<=INVL.InvoiceID  
-	WHERE INV.InvoiceDate >= '2015-01-01'
-	GROUP BY MONTH(INV.InvoiceDate), YEAR(INV.InvoiceDate)
-	)
-SELECT DISTINCT
+set statistics time on;
+select 
+IL.InvoiceID,
+I.InvoiceDate,
+C.CustomerName,
+IL.Quantity*IL.UnitPrice as [Sale Amount],
+(select sum(ILInner.Quantity*ILInner.UnitPrice)
+from [Sales].[InvoiceLines] as ILInner
+join [Sales].[Invoices] as IInner
+on IInner.InvoiceID = ILInner.InvoiceID
+where IInner.InvoiceDate >= '2015-01-01' 
+and IInner.InvoiceDate <= eomonth(I.InvoiceDate)
+) as [Sale Amount by Month]
+from [Sales].[InvoiceLines] as IL
+join [Sales].[Invoices] as I on I.InvoiceID = IL.InvoiceID
+join [Sales].[Customers] as C on C.CustomerID = I.CustomerID
+where I.InvoiceDate >= '2015-01-01'
+order by I.InvoiceDate, [Sale Amount], IL.InvoiceID, C.CustomerName;
+
+SELECT 
 I.InvoiceID, 
-C.CustomerName,
-I.InvoiceDate, 
-SUM(S.Quantity*S.UnitPrice) AS Summ,
-TCTE.TotalSumm AS Total
-FROM Sales.InvoiceLines AS S 
-JOIN Sales.Invoices AS I 
-ON I.InvoiceID=S.InvoiceID
-JOIN Sales.Customers AS C 
-ON I.CustomerID=C.CustomerID
-JOIN TotalSummCTE AS TCTE 
-ON TCTE.Mesyac1=MONTH(I.InvoiceDate) and TCTE.God1=YEAR(I.InvoiceDate)
-WHERE I.InvoiceDate >= '2015-01-01' 
-GROUP BY  I.InvoiceID, C.CustomerName, I.InvoiceDate, TCTE.TotalSumm
-ORDER BY I.InvoiceID;
-
-
-WITH TotalSummCTE AS 
-(SELECT  DISTINCT I.InvoiceID, 
-C.CustomerName,
 S.InvoiceDate, 
+C.CustomerName,
+I.Quantity*I.UnitPrice as [Sale Amount],
 SUM(I.Quantity*I.UnitPrice) OVER (ORDER BY YEAR(S.InvoiceDate), MONTH(S.InvoiceDate) RANGE UNBOUNDED PRECEDING) AS TotalSumm  
 FROM Sales.Invoices AS S
 JOIN Sales.InvoiceLines AS I 
 ON S.InvoiceID=I.InvoiceID
 JOIN Sales.Customers AS C 
 ON S.CustomerID=C.CustomerID
-WHERE S.InvoiceDate >= '2015-01-01'
-GROUP BY  I.InvoiceID, C.CustomerName, S.InvoiceDate, I.Quantity, I.UnitPrice
-)
-SELECT DISTINCT S.InvoiceID, 
-TCTE.CustomerName,
-TCTE.InvoiceDate,
-SUM(S.Quantity*S.UnitPrice) AS Summ,
-TCTE.TotalSumm 
-FROM Sales.InvoiceLines AS S
-JOIN TotalSummCTE AS TCTE ON TCTE.InvoiceID =S.InvoiceID
-GROUP BY S.InvoiceID, TCTE.TotalSumm, TCTE.CustomerName, TCTE.InvoiceDate
-ORDER BY S.InvoiceID
-set statistics time on;
+where S.InvoiceDate >= '2015-01-01' 
+and S.InvoiceDate <= eomonth(S.InvoiceDate)
+order by S.InvoiceDate, [Sale Amount], I.InvoiceID, C.CustomerName;
+
