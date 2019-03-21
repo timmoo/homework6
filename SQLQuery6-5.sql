@@ -12,3 +12,5 @@ ON I.CustomerID=C.CustomerID
  Select DISTINCT CTE.CustomerID, CTE.CustomerName, CTE.StockID, CTE.StockNAME, CTE.UnitPrice, CTE.DATE, CTE.NUMBER FROM CTE 
   where CTE.NUMBER<=2
    ORDER BY CTE.CustomerID;
+   
+   -- Тут вопрос касаемо того что у меня задваиваются строки, хотя использую DISTINCT думаю результат не верный поэтому.
