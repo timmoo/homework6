@@ -12,5 +12,5 @@
 	LAG(W.StockItemID) OVER (ORDER BY (W.StockItemName) ) as [Previous],
 	LAG(W.StockItemName, 2, 'No Items') OVER (ORDER BY (W.StockItemName) ) as [Previous2],
 	NTILE(30)  OVER (ORDER BY W.TypicalWeightPerUnit desc) AS [WeightGroup]
-	FROM Warehouse.StockItems AS W
-	ORDER BY W.StockItemName;
+FROM Warehouse.StockItems AS W
+ORDER BY W.StockItemName;
